@@ -39,6 +39,7 @@ def create_service(client_secret_file, api_name, api_version, *scopes, prefix=""
         )
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
+            print("refresh token")
             creds.refresh(Request())
         else:
             # Check if we're in WSL without browser

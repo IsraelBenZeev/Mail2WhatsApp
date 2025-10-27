@@ -47,9 +47,10 @@ You are an email assistant agent. Your task is to help search and read emails fo
 
 
 gmail_tool = GmailTool('client_secret.json')
+print(gmail_tool.search_emails("from:i0548542122@gmail.com"))
 
 tools = gmail_tool.get_tools()
-# print(f"tools: {tools}")
+print(f"tools: {tools}")
 agent = Agent(name="agent_mail", instructions=instructions,model="gpt-4o-mini", tools=tools)
 async def main():
     with trace("email agent"):
