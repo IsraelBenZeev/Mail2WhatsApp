@@ -29,9 +29,11 @@ def create_service(client_secret_file, api_name, api_version, *scopes, prefix=""
     token_dir = "token files"
     token_file = f"token_{API_SERVICE_NAME}_{API_VERSION}{prefix}.json"
     if not os.path.exists(os.path.join(working_dir, token_dir)):
+        print("token dos'nt exist")
         os.mkdir(os.path.join(working_dir, token_dir))
 
     if os.path.exists(os.path.join(working_dir, token_dir, token_file)):
+        print("token arledy exist")
         creds = Credentials.from_authorized_user_file(
             os.path.join(working_dir, token_dir, token_file), SCOPES
         )
@@ -63,8 +65,15 @@ def create_service(client_secret_file, api_name, api_version, *scopes, prefix=""
         service = build(
             API_SERVICE_NAME, API_VERSION, credentials=creds, static_discovery=False
         )
+        print("creds: ",creds.token)
+        print("creds: ",creds.refresh_token)
         return service
     except Exception:
         if os.path.exists(os.path.join(working_dir, token_dir, token_file)):
             os.remove(os.path.join(working_dir, token_dir, token_file))
+        print("creds: ",creds.token)
+        print("creds: ",creds.refresh_token)
         return None
+
+
+

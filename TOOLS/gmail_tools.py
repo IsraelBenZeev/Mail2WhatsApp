@@ -7,6 +7,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 from pydantic import BaseModel, Field
 from .google_apis import create_service
+from agents import function_tool
 
 
 class EmailMessage(BaseModel):
@@ -48,14 +49,13 @@ class GmailTool:
         self.service = create_service(
             self.client_secret_file, self.API_NAME, self.API_VERSION, self.SCOPES
         )
-
     def send_email(
         self,
         to: str,
         subject: str,
         body: str,
         body_type: Literal["plain", "html"] = "plain",
-        attachment_paths: Optional[List] = None,
+        attachment_paths: Optional[List[str]] = None,
     ) -> dict:
         """
         Send an email using the Gmail API.
@@ -135,18 +135,30 @@ class GmailTool:
         else:
             label_ = [label]
         while True:
+            # Build the API call parameters
+            api_params = {
+                "userId": "me",
+                "maxResults": min(500, max_results - len(messages))
+                if max_results
+                else 500,
+            }
+            
+            # Build query string
+            query_parts = []
+            if query:
+                query_parts.append(query)
+            if label_ is not None and label != "ALL":
+                query_parts.append(f"label:{label.lower()}")
+            
+            if query_parts:
+                api_params["q"] = " ".join(query_parts)
+            if next_page_token_:
+                api_params["pageToken"] = next_page_token_
+            
             result = (
                 self.service.users()
                 .messages()
-                .list(
-                    userId="me",
-                    q=query,
-                    LabelIds=label_,
-                    maxResults=min(500, max_results - len(messages))
-                    if max_results
-                    else 500,
-                    pageToken=next_page_token_,
-                )
+                .list(**api_params)
                 .execute()
             )
 
@@ -293,3 +305,44 @@ class GmailTool:
             return {"msg_id": msg_id, "status": "success"}
         except Exception as e:
             return {"error": f"An error occurred: {str(e)}", "status": "failed"}
+    
+    def get_tools(self):
+        """
+        Get all available Gmail tools as a list.
+        
+        Returns:
+            list: List of function tools that can be used by an agent.
+        """
+        # Create wrapper functions to avoid binding issues with @function_tool
+        @function_tool
+        def send_email(to: str, subject: str, body: str, body_type: Literal["plain", "html"] = "plain", attachment_paths: Optional[List[str]] = None) -> dict:
+            """Send an email using the Gmail API."""
+            return self.send_email(to, subject, body, body_type, attachment_paths)
+        
+        @function_tool
+        def search_emails(query: Optional[str] = None, label: Literal["ALL", "INBOX", "SENT", "DRAFT", "SPAM", "TRASH"] = "INBOX", max_results: Optional[int] = 10, next_page_token: Optional[str] = None):
+            """Search for emails in the user's mailbox using the Gmail API."""
+            return self.search_emails(query, label, max_results, next_page_token)
+        
+        @function_tool
+        def get_email_message_details(msg_id: str) -> EmailMessage:
+            """Get detailed information about an email message."""
+            return self.get_email_message_details(msg_id)
+        
+        @function_tool
+        def get_email_message_body(msg_id: str) -> str:
+            """Get the body of an email message."""
+            return self.get_email_message_body(msg_id)
+        
+        @function_tool
+        def delete_email_message(msg_id: str) -> dict:
+            """Delete an email message."""
+            return self.delete_email_message(msg_id)
+        
+        return [
+            send_email,
+            search_emails,
+            get_email_message_details,
+            get_email_message_body,
+            delete_email_message,
+        ]
