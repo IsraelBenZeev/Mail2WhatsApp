@@ -49,11 +49,12 @@ class GmailTool:
         self.service = create_service(
             self.client_secret_file, self.API_NAME, self.API_VERSION, self.SCOPES
         )
+
     def send_email(
         self,
-        to: str,
-        subject: str,
-        body: str,
+        to: Optional[str] = None,
+        subject: Optional[str] = None,
+        body: Optional[str] = None,
         body_type: Literal["plain", "html"] = "plain",
         attachment_paths: Optional[List[str]] = None,
     ) -> dict:
@@ -61,15 +62,32 @@ class GmailTool:
         Send an email using the Gmail API.
 
         Args:
-            to (str): Recipient email address.
-            subject (str): Email subject.
-            body (str): Email body content.
+            to (str): Recipient email address. If not provided, will return error asking for recipient.
+            subject (str): Email subject. If not provided, will return error asking for subject.
+            body (str): Email body content. If not provided, will return error asking for body.
             body_type (str): Type of the body content ('plain' or 'html').
             attachment_paths (list): List of file paths for attachments.
 
         Returns :
-            dict: Response from the Gmail API.
+            dict: Response from the Gmail API or error message with instructions.
         """
+        # Validate required parameters
+        if not to:
+            return {
+                "error": "Missing recipient email address. Please provide the recipient's email address (to).",
+                "status": "missing_parameters",
+            }
+        if not subject:
+            return {
+                "error": "Missing email subject. Please provide the email subject.",
+                "status": "missing_parameters",
+            }
+        if not body:
+            return {
+                "error": "Missing email body. Please provide the email message content (body).",
+                "status": "missing_parameters",
+            }
+
         try:
             message = MIMEMultipart()
             message["to"] = to
@@ -142,25 +160,20 @@ class GmailTool:
                 if max_results
                 else 500,
             }
-            
+
             # Build query string
             query_parts = []
             if query:
                 query_parts.append(query)
             if label_ is not None and label != "ALL":
                 query_parts.append(f"label:{label.lower()}")
-            
+
             if query_parts:
                 api_params["q"] = " ".join(query_parts)
             if next_page_token_:
                 api_params["pageToken"] = next_page_token_
-            
-            result = (
-                self.service.users()
-                .messages()
-                .list(**api_params)
-                .execute()
-            )
+
+            result = self.service.users().messages().list(**api_params).execute()
 
             messages.extend(result.get("messages", []))
 
@@ -305,40 +318,52 @@ class GmailTool:
             return {"msg_id": msg_id, "status": "success"}
         except Exception as e:
             return {"error": f"An error occurred: {str(e)}", "status": "failed"}
-    
+
     def get_tools(self):
         """
         Get all available Gmail tools as a list.
-        
+
         Returns:
             list: List of function tools that can be used by an agent.
         """
+
         # Create wrapper functions to avoid binding issues with @function_tool
         @function_tool
-        def send_email(to: str, subject: str, body: str, body_type: Literal["plain", "html"] = "plain", attachment_paths: Optional[List[str]] = None) -> dict:
-            """Send an email using the Gmail API."""
+        def send_email(
+            to: Optional[str] = None,
+            subject: Optional[str] = None,
+            body: Optional[str] = None,
+            body_type: Literal["plain", "html"] = "plain",
+            attachment_paths: Optional[List[str]] = None,
+        ) -> dict:
+            """Send an email using the Gmail API. All parameters (to, subject, body) are required but should be collected from the user before calling this function."""
             return self.send_email(to, subject, body, body_type, attachment_paths)
-        
+
         @function_tool
-        def search_emails(query: Optional[str] = None, label: Literal["ALL", "INBOX", "SENT", "DRAFT", "SPAM", "TRASH"] = "INBOX", max_results: Optional[int] = 10, next_page_token: Optional[str] = None):
+        def search_emails(
+            query: Optional[str] = None,
+            label: Literal["ALL", "INBOX", "SENT", "DRAFT", "SPAM", "TRASH"] = "INBOX",
+            max_results: Optional[int] = 10,
+            next_page_token: Optional[str] = None,
+        ):
             """Search for emails in the user's mailbox using the Gmail API."""
             return self.search_emails(query, label, max_results, next_page_token)
-        
+
         @function_tool
         def get_email_message_details(msg_id: str) -> EmailMessage:
             """Get detailed information about an email message."""
             return self.get_email_message_details(msg_id)
-        
+
         @function_tool
         def get_email_message_body(msg_id: str) -> str:
             """Get the body of an email message."""
             return self.get_email_message_body(msg_id)
-        
+
         @function_tool
         def delete_email_message(msg_id: str) -> dict:
             """Delete an email message."""
             return self.delete_email_message(msg_id)
-        
+
         return [
             send_email,
             search_emails,
