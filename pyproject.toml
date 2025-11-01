@@ -12,4 +12,5 @@ dependencies = [
     "google-auth-httplib2>=0.2.0",
     "google-auth-oauthlib>=1.2.2",
     "gradio>=5.49.1",
+    "fastapi>=0.120.2",
 ]

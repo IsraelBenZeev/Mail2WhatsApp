@@ -88,8 +88,8 @@ Follow these rules carefully:
 # אתחול
 gmail_tool = GmailTool("client_secret.json")
 tools = gmail_tool.get_tools()
-agent = Agent(
-    name="סוכן_מיילים", instructions=instructions, model="gpt-4o-mini", tools=tools
+mail_agent = Agent(
+    name="Gmail_Agent", instructions=instructions, model="gpt-4o-mini", tools=tools
 )
 
 
@@ -99,7 +99,7 @@ async def process_query_async(message, history):
         # הרצת הסוכן עם trace
         with trace("Gmail_Agent_Query"):
             # result = await Runner.run(agent, message)
-            result = await Runner.run(agent, message, session=session)
+            result = await Runner.run(mail_agent, message, session=session)
             print("📚 היסטוריה אחרי הריצה:", session)
 
         # המרת התוצאה לטקסט
