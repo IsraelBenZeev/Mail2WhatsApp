@@ -1,16 +1,12 @@
 import os
 import base64
-import random
-import string
 from typing import Literal, Optional, List
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from pydantic import BaseModel, Field
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-from googleapiclient.discovery import build
+from .google_apis import create_service
 from agents import function_tool
 
 
@@ -44,81 +40,16 @@ class GmailTool:
 
     def __init__(self, client_secret_file: str) -> None:
         self.client_secret_file = client_secret_file
-        self.access_token: Optional[str] = None
-        self.refresh_token: Optional[str] = None
-        self.service = None
-        self.init_tokens()
-        self._init_service()
-
-    def init_tokens(self) -> None:
-        """
-        מאתחל את הטוקנים (access_token ו-refresh_token).
-        בשלב זה הטוקנים הם רנדומליים לבדיקה.
-        בהמשך הטוקנים יבואו מבסיס הנתונים (DB).
-        """
-        # TODO: בשלב הבא, לטעון את הטוקנים מבסיס הנתונים
-        # self.access_token = db.get_access_token(user_id)
-        # self.refresh_token = db.get_refresh_token(user_id)
-
-        # רנדומלי לבדיקה - להסיר כשנעבור לטוקנים מה-DB
-
-        # self.access_token = "".join(
-        #     random.choices(string.ascii_letters + string.digits, k=100)
-        # )
-        # self.refresh_token = "".join(
-        #     random.choices(string.ascii_letters + string.digits, k=100)
-        # )
-        
+        # self._init_service()
 
     def _init_service(self) -> None:
         """
-        Initialize the Gmail API service using the class tokens.
+        Initialize the Gmail API service.
         """
-        # בדיקה שהטוקנים קיימים
-        if not self.access_token or not self.refresh_token:
-            print("טוקנים לא מאותחלים. נא לקרוא ל-init_tokens() קודם.")
-            raise ValueError("Tokens not initialized. Please call init_tokens() first.")
-
-        # Load client info from client_secret_file (נדרש גם עבור טוקנים תקפים)
-        import json
-
-        # אתחול ה client_id וה client_secret
-        with open(self.client_secret_file, "r") as f:
-            client_info = json.load(f)
-            # תמיכה גם ב-"web" וגם ב-"installed" (לפי סוג האפליקציה ב-Google Cloud Console)
-            if "installed" in client_info:
-                client_id = client_info["installed"]["client_id"]
-                client_secret = client_info["installed"]["client_secret"]
-            elif "web" in client_info:
-                print("web")
-                client_id = client_info["web"]["client_id"]
-                client_secret = client_info["web"]["client_secret"]
-            else:
-                raise ValueError(
-                    "client_secret.json must contain either 'web' or 'installed' configuration"
-                )
-
-        # Create credentials from tokens עם client_id ו-client_secret
-        creds = Credentials(
-            token=self.access_token,
-            refresh_token=self.refresh_token,
-            token_uri="https://oauth2.googleapis.com/token",
-            client_id=client_id,
-            client_secret=client_secret,
-            scopes=self.SCOPES,
+        self.service = create_service(
+            self.client_secret_file, self.API_NAME, self.API_VERSION, self.SCOPES
         )
 
-        # Refresh token if expired
-        if creds.expired and creds.refresh_token:
-            print("refresh token")
-            creds.refresh(Request())
-            self.access_token = creds.token
-
-        # Build the service
-        self.service = build(
-            self.API_NAME, self.API_VERSION, credentials=creds, static_discovery=False
-        )
-        print("service created")
     def send_email(
         self,
         to: Optional[str] = None,

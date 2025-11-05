@@ -5,6 +5,14 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 
 
+def get_auth_url(client_secret_file, scopes):
+    from google_auth_oauthlib.flow import InstalledAppFlow
+
+    flow = InstalledAppFlow.from_client_secrets_file(client_secret_file, scopes)
+    auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+    return auth_url
+
+
 def create_service(client_secret_file, api_name, api_version, *scopes, prefix=""):
     """
     Create a Google API service instance.
@@ -66,15 +74,12 @@ def create_service(client_secret_file, api_name, api_version, *scopes, prefix=""
         service = build(
             API_SERVICE_NAME, API_VERSION, credentials=creds, static_discovery=False
         )
-        print("creds: ",creds.token)
-        print("creds: ",creds.refresh_token)
+        print("creds: ", creds.token)
+        print("creds: ", creds.refresh_token)
         return service
     except Exception:
         if os.path.exists(os.path.join(working_dir, token_dir, token_file)):
             os.remove(os.path.join(working_dir, token_dir, token_file))
-        print("creds: ",creds.token)
-        print("creds: ",creds.refresh_token)
+        print("creds: ", creds.token)
+        print("creds: ", creds.refresh_token)
         return None
-
-
-
