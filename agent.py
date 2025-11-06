@@ -1,4 +1,4 @@
-from TOOLS.gmail_tools import GmailTool
+from tools_agent_email.gmail_tools import GmailTool
 from agents import Agent
 from dotenv import load_dotenv
 
@@ -78,10 +78,8 @@ Follow these rules carefully:
 """
 
 # אתחול
-gmail_tool = GmailTool("client_secret.json")
+gmail_tool = GmailTool()
 tools = gmail_tool.get_tools()
 mail_agent = Agent(
     name="Gmail_Agent", instructions=instructions, model="gpt-4o-mini", tools=tools
 )
-
-
