@@ -2,6 +2,10 @@ import os
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
+from dotenv import load_dotenv
+from supabase_client import supabase
+
+load_dotenv(override=True)
 
 
 class GoogleApis:
@@ -9,31 +13,39 @@ class GoogleApis:
     API_VERSION = "v1"
     SCOPES = ["https://mail.google.com/"]
 
-    def __init__(self, client_secret_file="client_secret.json"):
+    def __init__(self, user_id: str, client_secret_file="client_secret.json"):
         self.client_secret_file = client_secret_file
-        self.access_token = os.getenv("ACCESS_TOKEN") or None
-        self.refresh_token = os.getenv("REFRESH_TOKEN") or None
+        self.user_id = user_id
+        self.access_token = None
+        self.refresh_token = None
+        print("GoogleApis user_id: ", self.user_id)
         self._init_service()
 
     def init_tokens(self):
         print("init_tokens")
-        self.access_token = os.getenv("ACCESS_TOKEN")
-        self.refresh_token = os.getenv("REFRESH_TOKEN")
+        tokens = supabase.table("profiles").select("*").eq("id", self.user_id).execute()
+        print("tokens from supabase: ", tokens)
+        if tokens.data and len(tokens.data) > 0:
+            self.access_token = tokens.data[0].get("access_token")
+            self.refresh_token = tokens.data[0].get("refresh_token")
+            print("✅ Tokens initialized")
+            return True
+        else:
+            print(f"⚠️ No tokens found for user_id: {self.user_id}")
+            self.access_token = None
+            self.refresh_token = None
+            return False
 
     def _init_service(self) -> None:
         """
         Initialize the Gmail API service using the class tokens.
         """
-        # בדיקה שהטוקנים קיימים
+        if not self.init_tokens():
+            print(f"⚠️ Cannot init Gmail service: no tokens for user {self.user_id}")
+            self.service = None
+            return
         print("init_service")
-        if not self.access_token or not self.refresh_token:
-            print("בדיקה שהטוקנים קיימים")
-            raise ValueError("Tokens not initialized. Please call init_tokens() first.")
-
-        # Load client info from client_secret_file (נדרש גם עבור טוקנים תקפים)
         import json
-
-        # אתחול ה client_id וה client_secret
         with open(self.client_secret_file, "r") as f:
             client_info = json.load(f)
             # תמיכה גם ב-"web" וגם ב-"installed" (לפי סוג האפליקציה ב-Google Cloud Console)
@@ -60,7 +72,10 @@ class GoogleApis:
             client_secret=client_secret,
             scopes=self.SCOPES,
         )
-        self.refresh_tokens(creds)
+        if creds and creds.expired and creds.refresh_token:
+            self.refresh_tokens(creds)
+        else:
+            print("creds are not expired")
         service = build(
             self.API_NAME, self.API_VERSION, credentials=creds, static_discovery=False
         )

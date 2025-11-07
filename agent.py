@@ -78,8 +78,9 @@ Follow these rules carefully:
 """
 
 # אתחול
-gmail_tool = GmailTool()
-tools = gmail_tool.get_tools()
-mail_agent = Agent(
-    name="Gmail_Agent", instructions=instructions, model="gpt-4o-mini", tools=tools
-)
+def init_agent(user_id: str):
+    gmail_tool = GmailTool(user_id)
+    tools = gmail_tool.get_tools()
+    mail_agent = Agent(
+        name="Gmail_Agent", instructions=instructions, model="gpt-4o-mini", tools=tools)
+    return mail_agent

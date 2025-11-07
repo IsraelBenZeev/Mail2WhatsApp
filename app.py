@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import uvicorn
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 from routers.LLM_Router import routerLLM
 from routers.OAuth_Callback_Router import routerOAuthCallback
 from routers.Users_Router import routerUsers
@@ -26,16 +30,6 @@ async def root():
     print("root endpoint called!🙌")
     return {"message": "Welcome to the Mail2WhatsApp server!", "version": "5.0"}
 
-
-# @app.get("/users")
-# def get_users():
-#     print("users👥")
-#     users_list = supabase.auth.admin.list_users(page=1, per_page=100)
-#     print("users_list: ", users_list)
-#     return {"data": users_list}  # מחזיר את הרשימה ישירות
-
-
-# Register routers
 app.include_router(routerLLM, prefix="/llm", tags=["llm"])
 app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
 app.include_router(routerUsers, prefix="/users", tags=["users"])
@@ -44,7 +38,7 @@ HOST = os.getenv("HOST")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
-    print(f"Server running on {HOST:port}")
+    print(f"Server running on {HOST}:{port}")
     print("Registered routes:")
     for route in app.routes:
         if hasattr(route, "path") and hasattr(route, "methods"):
