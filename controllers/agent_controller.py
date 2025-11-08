@@ -7,10 +7,11 @@ session = SQLiteSession("conversation_123", "conversation_history.db")
 # Lazy initialization - יוצר את הסוכן רק בפעם הראשונה שמשתמשים בו
 _mail_agent = None
 
+
 def get_mail_agent(user_id: str):
-    global _mail_agent
-    if _mail_agent is None:
-        _mail_agent = init_agent(user_id)
+    # global _mail_agent
+    # if _mail_agent is None:
+    _mail_agent = init_agent(user_id)
     return _mail_agent
 
 
