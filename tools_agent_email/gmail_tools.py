@@ -65,7 +65,10 @@ class GmailTool:
             dict: Response from the Gmail API or error message with instructions.
         """
         if not self.service:
-            return {"error": "Gmail service not initialized. tokens are not valid.", "status": "error"}
+            return {
+                "error": "Gmail service not initialized. tokens are not valid.",
+                "status": "error",
+            }
         # Validate required parameters
         if not to:
             return {
@@ -141,7 +144,10 @@ class GmailTool:
             max_results (int): Maximum number of messages to return. The maximum allowed is 500.
         """
         if not self.service:
-            return {"error": "Gmail service not initialized. tokens are not valid.", "status": "error"}
+            return {
+                "error": "Gmail service not initialized. tokens are not valid.",
+                "status": "error",
+            }
         messages = []
         next_page_token_ = next_page_token
 
@@ -206,7 +212,10 @@ class GmailTool:
             EmailMessage: Detailed information about the email message.
         """
         if not self.service:
-            return {"error": "Gmail service not initialized. tokens are not valid.", "status": "error"}
+            return {
+                "error": "Gmail service not initialized. tokens are not valid.",
+                "status": "error",
+            }
         try:
             message = (
                 self.service.users().messages().get(userId="me", id=msg_id).execute()
@@ -317,7 +326,10 @@ class GmailTool:
             dict: Response indicating success or failure.
         """
         if not self.service:
-            return {"error": "Gmail service not initialized. tokens are not valid.", "status": "error"}
+            return {
+                "error": "Gmail service not initialized. tokens are not valid.",
+                "status": "error",
+            }
         try:
             self.service.users().messages().delete(userId="me", id=msg_id).execute()
             return {"msg_id": msg_id, "status": "success"}
@@ -332,7 +344,10 @@ class GmailTool:
             list: List of function tools that can be used by an agent.
         """
         if not self.service:
-            return {"error": "Gmail service not initialized. tokens are not valid.", "status": "error"}
+            # החזר רשימה ריקה במקום dict - Agent מצפה לרשימה
+            print("⚠️ Gmail service not initialized. Returning empty tools list.")
+            return []
+
         # Create wrapper functions to avoid binding issues with @function_tool
         @function_tool
         def send_email(
