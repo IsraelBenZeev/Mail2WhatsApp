@@ -9,7 +9,7 @@ def get_users():
 
 
 def save_tokens(user_id: str, access_token: str, refresh_token: str):
-    supabase.table("profiles").update(
+    supabase.table("user_tokens").update(
         {"access_token": access_token, "refresh_token": refresh_token}
     ).eq("id", user_id).execute()
     # return {"message": "Tokens saved successfully"}

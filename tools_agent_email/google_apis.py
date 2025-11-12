@@ -43,7 +43,10 @@ class GoogleApis:
         else:
             print("init_tokens from supabase")
             tokens = (
-                supabase.table("profiles").select("*").eq("id", self.user_id).execute()
+                supabase.table("user_tokens")
+                .select("*")
+                .eq("id", self.user_id)
+                .execute()
             )
             if tokens.data and len(tokens.data) > 0:
                 self.access_token = tokens.data[0].get("access_token")

@@ -15,4 +15,5 @@ dependencies = [
     "fastapi>=0.120.2",
     "uvicorn>=0.38.0",
     "supabase>=2.23.2",
+    "twilio>=9.8.6",
 ]
