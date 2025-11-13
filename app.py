@@ -39,14 +39,15 @@ app.include_router(routerUsers, prefix="/users", tags=["users"])
 HOST = os.getenv("HOST")
 
 if __name__ == "__main__":
-    import uvicorn
-    port = int(os.getenv("PORT", "8000"))
-    print(f"Server running on {HOST}:{port}")
-    print("Registered routes:")
-    for route in app.routes:
-        if hasattr(route, "path") and hasattr(route, "methods"):
-            print(f"  {list(route.methods)} {route.path}")
-    uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
+    if os.getenv("ENVIRONMENT") == "development":
+        import uvicorn
+        port = int(os.getenv("PORT", "8000"))
+        print(f"Server running on {HOST}:{port}")
+        print("Registered routes:")
+        for route in app.routes:
+            if hasattr(route, "path") and hasattr(route, "methods"):
+                print(f"  {list(route.methods)} {route.path}")
+        uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
 
 
 # פקודת הרצה uv run uvicorn app:app --reload
