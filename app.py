@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
-import uvicorn
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -31,7 +30,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     print("root endpoint called!🙌")
-    return {"message": "Welcome to the Mail2WhatsApp server!", "version": "5.0"}
+    return {"message": "Welcome to the Mail2WhatsApp server!", "version": "1.0"}
 
 app.include_router(routerLLM, prefix="/llm", tags=["llm"])
 app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
@@ -40,6 +39,7 @@ app.include_router(routerUsers, prefix="/users", tags=["users"])
 HOST = os.getenv("HOST")
 
 if __name__ == "__main__":
+    import uvicorn
     port = int(os.getenv("PORT", "8000"))
     print(f"Server running on {HOST}:{port}")
     print("Registered routes:")
