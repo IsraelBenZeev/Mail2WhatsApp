@@ -12,9 +12,12 @@ from routers.Users_Router import routerUsers
 # from supabase_client import supabase
 
 app = FastAPI()
+# origins = [
+#     "http://localhost:5173",
+#     "http://localhost:5174",
+# ]
 origins = [
-    "http://localhost:5173",
-    "http://localhost:5174",
+    os.getenv("CLIENT_URL"),
 ]
 app.add_middleware(
     CORSMiddleware,

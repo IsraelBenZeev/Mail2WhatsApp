@@ -1,5 +1,9 @@
 from supabase_client import supabase
 from fastapi.responses import RedirectResponse
+import os
+import dotenv
+
+dotenv.load_dotenv(override=True)
 
 
 def get_users():
@@ -13,4 +17,4 @@ def save_tokens(user_id: str, access_token: str, refresh_token: str):
         {"access_token": access_token, "refresh_token": refresh_token}
     ).eq("id", user_id).execute()
     # return {"message": "Tokens saved successfully"}
-    return RedirectResponse(url="http://localhost:5173/chat")
+    return RedirectResponse(url=f"{os.getenv("CLIENT_URL")}/chat")
