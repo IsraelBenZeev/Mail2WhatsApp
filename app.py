@@ -17,6 +17,7 @@ app = FastAPI()
 # ]
 origins = [
     os.getenv("CLIENT_URL"),
+    "http://localhost:5173",
 ]
 app.add_middleware(
     CORSMiddleware,
