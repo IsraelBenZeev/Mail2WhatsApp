@@ -11,10 +11,14 @@ def get_users():
     print("users: ", users)
     return users
 
+def save_token_from_supabase(body: dict):
+    print("save_token_from_supabase: ", body)
+    return {"message": "Token saved successfully"}
 
-def save_tokens(user_id: str, access_token: str, refresh_token: str):
+    
+def save_tokens_accessMail(user_id: str, access_token: str, refresh_token: str):
     supabase.table("user_tokens").update(
         {"access_token": access_token, "refresh_token": refresh_token}
     ).eq("id", user_id).execute()
     # return {"message": "Tokens saved successfully"}
-    return RedirectResponse(url=f"{os.getenv("CLIENT_URL")}/chat")
+    return RedirectResponse(url=f"{os.getenv('CLIENT_URL')}/chat")

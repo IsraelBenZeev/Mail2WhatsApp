@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from google_auth_oauthlib.flow import InstalledAppFlow
 import os
 from dotenv import load_dotenv
-from controllers.Users_Controller import save_tokens
+from controllers.Users_Controller import save_tokens_accessMail
 
 load_dotenv(override=True)
 
@@ -26,8 +26,6 @@ async def authorize_gmail(user_id: str):
             access_type="offline",
             state=user_id,
         )
-        print("Authorization URL:", auth_url)
-        print("User ID in state:", user_id)
         return {"auth_url": auth_url}
     except Exception as e:
         print(f"Error in authorize_gmail: {str(e)}")
@@ -59,7 +57,7 @@ async def oauth2callback(code: str, state: str):
         #     "access_token": creds.token,
         #     "refresh_token": creds.refresh_token,
         # }
-        return save_tokens(user_id, creds.token, creds.refresh_token)
+        return save_tokens_accessMail(user_id, creds.token, creds.refresh_token)
     except Exception as e:
         print(f"Error in oauth2callback: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))

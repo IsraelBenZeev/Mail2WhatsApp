@@ -12,6 +12,7 @@ class AuthorizeRequest(BaseModel):
     user_id: str
 
 
+
 @routerOAuthCallback.post("/authorize_gmail/{user_id}")
 async def authorize_gmail(user_id: str):
     print("user_id: ", user_id)
