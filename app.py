@@ -35,9 +35,10 @@ async def root():
     print("root endpoint called!🙌")
     return {"message": "Welcome to the Mail2WhatsApp server!", "version": "1.0"}
 
+2
 app.include_router(routerLLM, prefix="/llm", tags=["llm"])
 app.include_router(routerOAuthCallback, prefix="/isr", tags=["isr"])
-# app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
+app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
 app.include_router(routerAuthSignin, prefix="/Auth", tags=["Auth"])
 app.include_router(routerUsers, prefix="/users", tags=["users"])
 
@@ -46,6 +47,7 @@ HOST = os.getenv("HOST")
 if __name__ == "__main__":
     if os.getenv("ENVIRONMENT") == "development":
         import uvicorn
+
         port = int(os.getenv("PORT", "8000"))
         print(f"Server running on {HOST}:{port}")
         print("Registered routes:")
