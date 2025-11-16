@@ -36,7 +36,8 @@ async def root():
     return {"message": "Welcome to the Mail2WhatsApp server!", "version": "1.0"}
 
 app.include_router(routerLLM, prefix="/llm", tags=["llm"])
-app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
+app.include_router(routerOAuthCallback, prefix="/oauth", tags=["oauth"])
+# app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
 app.include_router(routerAuthSignin, prefix="/Auth", tags=["Auth"])
 app.include_router(routerUsers, prefix="/users", tags=["users"])
 
