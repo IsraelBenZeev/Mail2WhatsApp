@@ -18,13 +18,12 @@ CLIENT_SECRET_FILE = os.getenv("GOOGLE_CLIENT_SECRET_JSON")
 SCOPES = ["https://mail.google.com/"]
 
 
-def write_env_json_to_file(env_key: str, file_name: str):
+def write_env_json_to_temp_file(env_key: str):
     """
-    קוראת משתנה סביבה שמכיל JSON, ממירה אותו ל-JSON, ויוצרת קובץ עם השם הנתון ב-ROOT.
+    קוראת משתנה סביבה שמכיל JSON, ממירה אותו ל-JSON, ויוצרת קובץ זמני ב-/tmp.
 
     :param env_key: מפתח משתנה הסביבה שמכיל את ה-JSON
-    :param file_name: שם הקובץ שיווצר
-    :return: נתיב מלא לקובץ שנוצר
+    :return: אובייקט NamedTemporaryFile (tmp_file.name הוא הנתיב)
     """
     json_str = os.getenv(env_key)
     if not json_str:
@@ -35,12 +34,11 @@ def write_env_json_to_file(env_key: str, file_name: str):
     except json.JSONDecodeError as e:
         raise Exception(f"Invalid JSON in environment variable '{env_key}': {str(e)}")
 
-    file_path = os.path.join(os.getcwd(), file_name)
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-
-    return file_path
+    # יצירת קובץ זמני ב-/tmp
+    tmp_file = NamedTemporaryFile(mode="w+", delete=False, suffix=".json")
+    json.dump(data, tmp_file, indent=2)
+    tmp_file.flush()  # לוודא שכל הנתונים נכתבו
+    return tmp_file  # tmp_file.name מכיל את הנתיב
 
 
 def delete_file(file_path: str):
@@ -54,12 +52,10 @@ def delete_file(file_path: str):
 
 
 async def authorize_gmail(user_id: str):
-    temp_file = write_env_json_to_file(
-        "GOOGLE_CLIENT_SECRET_JSON", "client_secret.json"
-    )
+    temp_file = write_env_json_to_temp_file("GOOGLE_CLIENT_SECRET_JSON")
     try:
         flow = InstalledAppFlow.from_client_secrets_file(
-            temp_file,
+            temp_file.name,
             SCOPES,
             # redirect_uri=f"{HOST}/OAuth/oauth2callback",
             redirect_uri=f"{HOST}/isr/oauth2callback",
@@ -69,7 +65,7 @@ async def authorize_gmail(user_id: str):
             access_type="offline",
             state=user_id,
         )
-        delete_file(temp_file)
+        # delete_file(temp_file)
         return {"auth_url": auth_url}
     except Exception as e:
         print(f"Error in authorize_gmail: {str(e)}")
@@ -84,15 +80,13 @@ async def oauth2callback(code: str, state: str):
     user_id = state
     print(f"oauth2callback called with code={code[:20]}... and user_id={user_id}👍")
     try:
-        temp_file = write_env_json_to_file(
-            "GOOGLE_CLIENT_SECRET_JSON", "client_secret.json"
-        )
+        temp_file = write_env_json_to_temp_file("GOOGLE_CLIENT_SECRET_JSON")
         flow = InstalledAppFlow.from_client_secrets_file(
-            temp_file,
+            temp_file.name,
             SCOPES,
             redirect_uri=f"{HOST}/isr/oauth2callback",
         )
-        delete_file(temp_file)
+        # delete_file(temp_file)
         flow.fetch_token(code=code)
         creds = flow.credentials
 
