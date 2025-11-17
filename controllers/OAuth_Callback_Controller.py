@@ -60,6 +60,7 @@ async def authorize_gmail(user_id: str):
             # redirect_uri=f"{HOST}/OAuth/oauth2callback",
             redirect_uri=f"{HOST}/isr/oauth2callback",
         )
+        print("redirect_uri: ", f"{HOST}/isr/oauth2callback")
         auth_url, _ = flow.authorization_url(
             prompt="consent",
             access_type="offline",
