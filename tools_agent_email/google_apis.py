@@ -3,6 +3,8 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from dotenv import load_dotenv
 from supabase_client import supabase
+import os
+from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
@@ -72,22 +74,36 @@ class GoogleApis:
             return
         print("init_service")
         import json
+        client_secret_json = os.getenv("GOOGLE_CLIENT_SECRET_JSON")
+        client_info = json.loads(client_secret_json)
 
-        with open(self.client_secret_file, "r") as f:
-            client_info = json.load(f)
-            if "installed" in client_info:
-                print("installed")
-                client_id = client_info["installed"]["client_id"]
-                client_secret = client_info["installed"]["client_secret"]
-            elif "web" in client_info:
-                print("web")
-                client_id = client_info["web"]["client_id"]
-                client_secret = client_info["web"]["client_secret"]
-            else:
-                print("client secret.json חסר 'web' או 'installed'")
-                return {
-                    "error": "client_secret.json must contain either 'web' or 'installed' configuration"
-                }
+        if not client_secret_json:
+            raise Exception("GOOGLE_CLIENT_SECRET_JSON not found in env")
+        if "installed" in client_info:
+            print("installed")
+            client_id = client_info["installed"]["client_id"]
+            client_secret = client_info["installed"]["client_secret"]
+        elif "web" in client_info:
+            print("web")
+            client_id = client_info["web"]["client_id"]
+            client_secret = client_info["web"]["client_secret"]
+        else:
+            raise Exception("client_secret.json must contain either 'web' or 'installed' configuration")
+        # with open(self.client_secret_file, "r") as f:
+        #     client_info = json.load(f)
+        #     if "installed" in client_info:
+        #         print("installed")
+        #         client_id = client_info["installed"]["client_id"]
+        #         client_secret = client_info["installed"]["client_secret"]
+        #     elif "web" in client_info:
+        #         print("web")
+        #         client_id = client_info["web"]["client_id"]
+        #         client_secret = client_info["web"]["client_secret"]
+        #     else:
+        #         print("client secret.json חסר 'web' או 'installed'")
+        #         return {
+        #             "error": "client_secret.json must contain either 'web' or 'installed' configuration"
+        #         }
 
         # Create credentials from tokens עם client_id ו-client_secret
         creds = Credentials(

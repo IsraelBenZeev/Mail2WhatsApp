@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel
 from controllers.OAuth_Callback_Controller import (
     authorize_gmail as authorize_gmail_controller,
@@ -13,12 +13,12 @@ class AuthorizeRequest(BaseModel):
 
 
 @routerOAuthCallback.get("/authorize_gmail/{user_id}")
-async def authorize_gmail(user_id: str, request: Request):
+async def authorize_gmail(user_id: str):
     print("user_id: ", user_id)
-    return await authorize_gmail_controller(user_id, request)
+    return await authorize_gmail_controller(user_id)
 
 
 @routerOAuthCallback.get("/oauth2callback")
-async def oauth2callback(code: str, state: str, request: Request):
+async def oauth2callback(code: str, state: str):
     print("state in oauth2callback: ", state)
-    return await oauth2callback_controller(code, state, request)
+    return await oauth2callback_controller(code, state)

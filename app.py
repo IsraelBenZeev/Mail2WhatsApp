@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
-
+# print("GOOGLE_CLIENT_SECRETS_JSON: ", os.getenv("GOOGLE_CLIENT_SECRET_JSON"))
 from routers.LLM_Router import routerLLM
 from routers.OAuth_Callback_Router import routerOAuthCallback
 from routers.Users_Router import routerUsers
@@ -35,10 +35,10 @@ async def root():
     print("root endpoint called!🙌")
     return {"message": "Welcome to the Mail2WhatsApp server!", "version": "1.0"}
 
-2
+
 app.include_router(routerLLM, prefix="/llm", tags=["llm"])
 app.include_router(routerOAuthCallback, prefix="/isr", tags=["isr"])
-app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
+# app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
 app.include_router(routerAuthSignin, prefix="/Auth", tags=["Auth"])
 app.include_router(routerUsers, prefix="/users", tags=["users"])
 
