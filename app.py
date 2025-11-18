@@ -37,8 +37,8 @@ async def root():
 
 
 app.include_router(routerLLM, prefix="/llm", tags=["llm"])
-app.include_router(routerOAuthCallback, prefix="/isr", tags=["isr"])
-# app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
+# app.include_router(routerOAuthCallback, prefix="/isr", tags=["isr"])
+app.include_router(routerOAuthCallback, prefix="/OAuth", tags=["OAuth"])
 app.include_router(routerAuthSignin, prefix="/Auth", tags=["Auth"])
 app.include_router(routerUsers, prefix="/users", tags=["users"])
 

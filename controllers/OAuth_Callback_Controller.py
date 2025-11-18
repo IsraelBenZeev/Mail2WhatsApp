@@ -58,9 +58,9 @@ async def authorize_gmail(user_id: str):
             temp_file.name,
             SCOPES,
             # redirect_uri=f"{HOST}/OAuth/oauth2callback",
-            redirect_uri=f"{HOST}/isr/oauth2callback",
+            redirect_uri=f"{HOST}/OAuth/oauth2callback",
         )
-        print("redirect_uri: ", f"{HOST}/isr/oauth2callback")
+        print("redirect_uri: ", f"{HOST}/OAuth/oauth2callback")
         auth_url, _ = flow.authorization_url(
             prompt="consent",
             access_type="offline",
@@ -85,7 +85,7 @@ async def oauth2callback(code: str, state: str):
         flow = InstalledAppFlow.from_client_secrets_file(
             temp_file.name,
             SCOPES,
-            redirect_uri=f"{HOST}/isr/oauth2callback",
+            redirect_uri=f"{HOST}/OAuth/oauth2callback",
         )
         # delete_file(temp_file)
         flow.fetch_token(code=code)
