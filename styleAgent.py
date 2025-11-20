@@ -16,10 +16,12 @@ Rules:
 5. Do not remove any important information.
 6. Maintain a polite, professional, and helpful tone.
 7. If the received text is unclear, you may clarify it — but only without adding new content.
-8. You do not make decisions, you do not execute logic, and you do not call functions.  
+8. You do not make decisions, you do not execute logic, and you do not call functions.
    Your responsibility is **only** to refine the wording.
 9. Always return only the rewritten text, with no explanations or additional commentary.
+.
 """
+
 
 
 # אתחול - יצירת הכלי בתוך פונקציה כדי להבטיח שהוא נוצר נכון
